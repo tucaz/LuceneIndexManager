@@ -24,6 +24,16 @@ namespace LuceneIndexManager.Tests
         }
 
         [Test]
+        public void can_register_an_IIndexSource2()
+        {
+            var indexService = new IndexManager();
+
+            indexService.RegisterIndex<TestIndexSource>();
+
+            indexService.RegisteredIndexSources.Count.Should().Be.EqualTo(1);
+        }
+
+        [Test]
         public void can_create_an_Index()
         {
             var indexService = new IndexManager();
@@ -34,6 +44,18 @@ namespace LuceneIndexManager.Tests
             var count = indexService.CreateIndexes();
 
             count.Should().Be.EqualTo(1);
+        }
+
+        [Test]
+        public void can_find_IndexDefinition()
+        {
+            var indexService = new IndexManager();
+
+            indexService.RegisterIndex<TestIndexSource>();
+
+            var index = indexService.FindRegisteredIndex(typeof(TestIndexSource));
+
+            index.Should().Not.Be.Null();
         }
 
         private class TestIndexSource : AbstractIndexDefinition

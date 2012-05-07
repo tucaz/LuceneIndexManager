@@ -4,6 +4,8 @@ using Lucene.Net.Analysis;
 using Lucene.Net.Analysis.Standard;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Lucene.Net.QueryParsers;
+using Lucene.Net.Search;
 using Lucene.Net.Store;
 
 namespace LuceneIndexManager
@@ -35,6 +37,18 @@ namespace LuceneIndexManager
         public virtual IEnumerable<Document> GetAllDocuments()
         {
             return new List<Document>();
+        }
+
+        public virtual IndexSearcher GetIndexSearcher()
+        {
+            var indexSearcher = new IndexSearcher(this.GetDirectory(), true);
+            return indexSearcher;
+        }
+
+        public virtual QueryParser GetDefaultQueryParser()
+        {
+            var queryParser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, String.Empty, this.GetAnalyzer());
+            return queryParser;
         }
     }
 }

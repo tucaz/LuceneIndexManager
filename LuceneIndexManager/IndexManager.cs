@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+using Lucene.Net.Search;
 
 namespace LuceneIndexManager
 {
@@ -11,14 +9,20 @@ namespace LuceneIndexManager
     {
         public IndexManager()
         {
-            this.RegisteredIndexSources = new List<IIndexDefinition>();
+            this.RegisteredIndexSources = new Dictionary<int, IIndexDefinition>();
         }
         
-        public List<IIndexDefinition> RegisteredIndexSources { get; private set; }
+        public Dictionary<int, IIndexDefinition> RegisteredIndexSources { get; private set; }
+
+        public void RegisterIndex<T>() where T : IIndexDefinition
+        {
+            var source = Activator.CreateInstance<T>();
+            this.RegisterIndex(source);
+        }
         
         public void RegisterIndex(IIndexDefinition source)
         {
-            this.RegisteredIndexSources.Add(source);
+            this.RegisteredIndexSources.Add(source.GetType().GetHashCode(),  source);
         }
 
         public int CreateIndexes()
@@ -27,7 +31,7 @@ namespace LuceneIndexManager
             
             foreach (var index in this.RegisteredIndexSources)
             {
-                CreateIndex(index);
+                CreateIndex(index.Value);
                 indexesCreated++;
             }
 
@@ -52,5 +56,23 @@ namespace LuceneIndexManager
             }
         }
 
+        public IndexSearcher GetSearcher<T>() where T : IIndexDefinition
+        {
+            var index = this.FindRegisteredIndex(typeof(T));
+            var searcher = index.GetIndexSearcher();
+
+            
+
+            return searcher;
+        }
+
+        //TODO: This is internal just to be available for testing. Need to turn it to private and find another way to test it
+        internal IIndexDefinition FindRegisteredIndex(Type t)
+        {
+            var hash = t.GetHashCode();
+            var index = this.RegisteredIndexSources[hash];
+
+            return index;
+        }
     }
 }

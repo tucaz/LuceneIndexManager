@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using Lucene.Net.Documents;
 using Lucene.Net.Index;
+using Lucene.Net.QueryParsers;
+using Lucene.Net.Search;
 
 namespace LuceneIndexManager
 {
@@ -8,5 +10,7 @@ namespace LuceneIndexManager
     {
         IndexWriter GetIndexWriter();
         IEnumerable<Document> GetAllDocuments();
+        IndexSearcher GetIndexSearcher();
+        QueryParser GetDefaultQueryParser();
     }
 }
