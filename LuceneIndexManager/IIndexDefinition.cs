@@ -3,6 +3,7 @@ using Lucene.Net.Documents;
 using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
+using LuceneIndexManager.Facets;
 
 namespace LuceneIndexManager
 {
@@ -12,5 +13,6 @@ namespace LuceneIndexManager
         IEnumerable<Document> GetAllDocuments();
         IndexSearcher GetIndexSearcher();
         QueryParser GetDefaultQueryParser();
+        List<FacetDefinition> GetFacetsDefinition();
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Search;
+using LuceneIndexManager.Facets;
 
 namespace LuceneIndexManager
 {
@@ -53,16 +54,25 @@ namespace LuceneIndexManager
                 indexWriter.Commit();
                 indexWriter.Optimize();
                 indexWriter.Close();
+
+                CreateFacets(index);
             }
         }
+
+        private void CreateFacets(IIndexDefinition index)
+        {            
+            var facetsToCreate = index.GetFacetsDefinition();
+
+            var builder = new FacetBuilder(index);
+            builder.CreateFacets(facetsToCreate);
+        }        
+
+        #region Searching Operations
 
         public IndexSearcher GetSearcher<T>() where T : IIndexDefinition
         {
             var index = this.FindRegisteredIndex(typeof(T));
             var searcher = index.GetIndexSearcher();
-
-            
-
             return searcher;
         }
 
@@ -74,5 +84,7 @@ namespace LuceneIndexManager
 
             return index;
         }
+
+        #endregion
     }
 }

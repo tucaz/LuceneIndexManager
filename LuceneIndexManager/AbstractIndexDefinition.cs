@@ -7,12 +7,14 @@ using Lucene.Net.Index;
 using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Store;
+using LuceneIndexManager.Facets;
 
 namespace LuceneIndexManager
 {
     public abstract class AbstractIndexDefinition : IIndexDefinition
     {
         private IndexWriter _indexWriter;
+        private RAMDirectory _directory;
         
         public virtual IndexWriter GetIndexWriter()
         {
@@ -26,7 +28,10 @@ namespace LuceneIndexManager
 
         protected virtual Directory GetDirectory()
         {
-            return new RAMDirectory();
+            if(this._directory == null)
+                this._directory = new RAMDirectory();
+
+            return this._directory;
         }
 
         protected virtual Analyzer GetAnalyzer()
@@ -41,7 +46,7 @@ namespace LuceneIndexManager
 
         public virtual IndexSearcher GetIndexSearcher()
         {
-            var indexSearcher = new IndexSearcher(this.GetDirectory(), true);
+            var indexSearcher = new IndexSearcher(this.GetDirectory(), true);            
             return indexSearcher;
         }
 
@@ -49,6 +54,11 @@ namespace LuceneIndexManager
         {
             var queryParser = new QueryParser(Lucene.Net.Util.Version.LUCENE_29, String.Empty, this.GetAnalyzer());
             return queryParser;
+        }
+
+        public virtual List<FacetDefinition> GetFacetsDefinition()
+        {
+            return new List<FacetDefinition>();    
         }
     }
 }

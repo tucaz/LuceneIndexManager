@@ -76,6 +76,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AbstractIndexDefinition.cs" />
+    <Compile Include="Facets\Facet.cs" />
+    <Compile Include="Facets\FacetBuilder.cs" />
+    <Compile Include="Facets\FacetDefinition.cs" />
     <Compile Include="FSIndexDefinition.cs" />
     <Compile Include="IIndexDefinition.cs" />
     <Compile Include="IndexManager.cs" />
