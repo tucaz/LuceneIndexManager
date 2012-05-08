@@ -1,15 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Lucene.Net.Documents;
-using Lucene.Net.Search;
-using Lucene.Net.Store;
 using LuceneIndexManager.Facets;
+using LuceneIndexManager.Util;
 using NUnit.Framework;
 using SharpTestsEx;
-using LuceneIndexManager.Util;
 
 namespace LuceneIndexManager.Tests
 {
@@ -31,7 +25,7 @@ namespace LuceneIndexManager.Tests
         [Test]
         public void can_create_facet()
         {
-            var definition = new FacetDefinition("DVD", "DVD", "ProductType");
+            var definition = new FacetDefinition("ProductTypeFace", "Product Type", "ProductType");
             var builder = new FacetBuilder(_index);
 
             var facets = builder.CreateFacets(new List<FacetDefinition>() { definition });

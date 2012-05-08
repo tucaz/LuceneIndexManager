@@ -8,6 +8,8 @@ namespace LuceneIndexManager
 {
     public class IndexManager
     {
+        private static Dictionary<int, List<Facet>> _facets = new Dictionary<int,List<Facet>>();
+        
         public IndexManager()
         {
             this.RegisteredIndexSources = new Dictionary<int, IIndexDefinition>();
@@ -23,6 +25,9 @@ namespace LuceneIndexManager
         
         public void RegisterIndex(IIndexDefinition source)
         {
+            if (this.RegisteredIndexSources.ContainsKey(source.GetType().GetHashCode()))
+                throw new ArgumentException("Only one index of the same type can be registered. There is no reason why you would want to register the same index twice. :)");
+            
             this.RegisteredIndexSources.Add(source.GetType().GetHashCode(),  source);
         }
 
@@ -55,7 +60,7 @@ namespace LuceneIndexManager
                 indexWriter.Optimize();
                 indexWriter.Close();
 
-                CreateFacets(index);
+                CreateFacets(index);                
             }
         }
 
@@ -64,7 +69,9 @@ namespace LuceneIndexManager
             var facetsToCreate = index.GetFacetsDefinition();
 
             var builder = new FacetBuilder(index);
-            builder.CreateFacets(facetsToCreate);
+            var facets = builder.CreateFacets(facetsToCreate);
+
+            _facets.Add(index.GetHashCode(), facets);
         }        
 
         #region Searching Operations

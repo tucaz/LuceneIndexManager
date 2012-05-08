@@ -34,6 +34,19 @@ namespace LuceneIndexManager.Tests
         }
 
         [Test]
+        public void can_register_only_one_index_of_the_same_type()
+        {
+            var indexService = new IndexManager();            
+
+            indexService.RegisterIndex<TestIndexSource>();
+
+            Executing
+                .This(() => indexService.RegisterIndex<TestIndexSource>())
+                .Should().Throw<ArgumentException>()
+                    .And.ValueOf.Message.Should().Be.EqualTo("Only one index of the same type can be registered. There is no reason why you would want to register the same index twice. :)");
+        }
+
+        [Test]
         public void can_create_an_Index()
         {
             var indexService = new IndexManager();
