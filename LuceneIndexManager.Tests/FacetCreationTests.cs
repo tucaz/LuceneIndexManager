@@ -45,6 +45,8 @@ namespace LuceneIndexManager.Tests
             values.Should().Have.SameValuesAs("DVD", "Book");
         }
 
+        
+        //TODO: Keep this here?
         private class ProductIndex : AbstractIndexDefinition
         {
             public override IEnumerable<Document> GetAllDocuments()

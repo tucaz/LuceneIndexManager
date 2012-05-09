@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Lucene.Net.Index;
 using Lucene.Net.Search;
+using Lucene.Net.Util;
 
 namespace LuceneIndexManager.Facets
 {
@@ -41,11 +42,10 @@ namespace LuceneIndexManager.Facets
             {
                 var facetQuery = new TermQuery(new Term(definition.Field, x));
                 var facetQueryFilter = new CachingWrapperFilter(new QueryWrapperFilter(facetQuery));
-                var genreBitArray = facetQueryFilter.GetDocIdSet(indexReader);
+                var bitSet = new OpenBitSetDISI(facetQueryFilter.GetDocIdSet(indexReader).Iterator(), indexReader.MaxDoc());
 
-                var facet = new Facet(definition.UniqueName, definition.DisplayName, definition.Field, x, genreBitArray);
+                var facet = new Facet(definition.UniqueName, definition.DisplayName, definition.Field, x, bitSet);
                 return facet;
-
             }).ToList();
 
             return facets;

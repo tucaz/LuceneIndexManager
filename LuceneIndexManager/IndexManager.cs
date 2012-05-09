@@ -8,7 +8,7 @@ namespace LuceneIndexManager
 {
     public class IndexManager
     {
-        private static Dictionary<int, List<Facet>> _facets = new Dictionary<int,List<Facet>>();
+        public static Dictionary<int, List<Facet>> _facets = new Dictionary<int,List<Facet>>();
         
         public IndexManager()
         {

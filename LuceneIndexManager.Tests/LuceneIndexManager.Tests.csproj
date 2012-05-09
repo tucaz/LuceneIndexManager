@@ -57,6 +57,7 @@
     <Compile Include="FacetCreationTests.cs" />
     <Compile Include="IndexManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SearchingWithFacetsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
