@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lucene.Net.Search;
+using Lucene.Net.Util;
 using LuceneIndexManager.Facets;
 
 namespace LuceneIndexManager
 {
     public class IndexManager
     {
-        public static Dictionary<int, List<Facet>> _facets = new Dictionary<int,List<Facet>>();
+        private Dictionary<int, List<Facet>> _facets = new Dictionary<int,List<Facet>>();
         
         public IndexManager()
         {
@@ -81,6 +82,34 @@ namespace LuceneIndexManager
             var index = this.FindRegisteredIndex(typeof(T));
             var searcher = index.GetIndexSearcher();
             return searcher;
+        }
+
+        public FacetSearchResult SearchWithFacets<T>(string query) where T : IIndexDefinition
+        {
+            var index = this.FindRegisteredIndex(typeof(T));
+            var searcher = this.GetSearcher<T>();
+            var indexReader = searcher.GetIndexReader();
+            var queryParser = index.GetDefaultQueryParser();
+            var parsedQuery = queryParser.Parse(query);
+
+            var searchQueryFilter = new QueryWrapperFilter(parsedQuery);
+
+            var hits = searcher.Search(parsedQuery);
+
+            var facets = this._facets.First().Value.Select(x =>
+            {
+                var bits = new OpenBitSetDISI(searchQueryFilter.GetDocIdSet(indexReader).Iterator(), indexReader.MaxDoc());
+                bits.And(x.MatchingDocuments);
+                var count = bits.Cardinality();
+
+                return new FacetMatch() { Count = count, Value = x.Value };
+            }).ToList();
+
+            return new FacetSearchResult()
+            {
+                Facets = facets,
+                Hits = hits
+            };
         }
 
         //TODO: This is internal just to be available for testing. Need to turn it to private and find another way to test it

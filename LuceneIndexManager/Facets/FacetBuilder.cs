@@ -35,6 +35,7 @@ namespace LuceneIndexManager.Facets
 
         private List<Facet> CreateFacet(FacetDefinition definition)
         {
+            //TODO: Should this class have access to the index or should it receive all terms from somewhere else?
             var indexReader = this.Index.GetIndexSearcher().GetIndexReader();
             var allTerms = this.GetAllTermsForField(definition.Field, indexReader);
 

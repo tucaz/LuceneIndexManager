@@ -42,9 +42,8 @@ namespace LuceneIndexManager.Tests
 
             values.Should().Not.Be.Null();
             values.Count.Should().Be.EqualTo(2);
-            values.Should().Have.SameValuesAs("DVD", "Book");
+            values.Should().Have.SameValuesAs("dvd", "book");
         }
-
         
         //TODO: Keep this here?
         private class ProductIndex : AbstractIndexDefinition
@@ -52,24 +51,24 @@ namespace LuceneIndexManager.Tests
             public override IEnumerable<Document> GetAllDocuments()
             {
                 yield return new Document()
-                    .AddStringField("Name", "Harry Potter 1")
-                    .AddStringField("ProductType", "DVD");
+                    .AddField("Name", "Harry Potter 1", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
 
                 yield return new Document()
-                    .AddStringField("Name", "Harry Potter 2")
-                    .AddStringField("ProductType", "DVD");
+                    .AddField("Name", "Harry Potter 2", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
 
                 yield return new Document()
-                    .AddStringField("Name", "Harry Potter 3")
-                    .AddStringField("ProductType", "DVD");
+                    .AddField("Name", "Harry Potter 3", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
 
                 yield return new Document()
-                    .AddStringField("Name", "Harry Potter 1")
-                    .AddStringField("ProductType", "Book");
+                    .AddField("Name", "Harry Potter 1", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "Book", Field.Store.YES, Field.Index.ANALYZED);
 
                 yield return new Document()
-                    .AddStringField("Name", "Harry Potter 1")
-                    .AddStringField("ProductType", "Book");
+                    .AddField("Name", "Harry Potter 1", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "Book", Field.Store.YES, Field.Index.ANALYZED);
             }
         }
     }

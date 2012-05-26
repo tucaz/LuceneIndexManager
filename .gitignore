@@ -4,3 +4,8 @@ obj
 
 # mstest test results
 TestResults
+
+#ncrunch files
+*.crunchsolution.cache
+*.ncrunchsolution
+*.ncrunchproject

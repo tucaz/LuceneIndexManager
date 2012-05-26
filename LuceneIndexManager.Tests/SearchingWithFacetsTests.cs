@@ -31,32 +31,33 @@ namespace LuceneIndexManager.Tests
         [Test]
         public void can_search_and_get_facets()
         {
-            var searcher = _manager.GetSearcher<ProductIndex>();
-            var indexReader = searcher.GetIndexReader();
-            var queryParser = _index.GetDefaultQueryParser();
-            var query = queryParser.Parse("Name:harry*");
-            
-            var searchQueryFilter = new QueryWrapperFilter(query);
+            var results = _manager.SearchWithFacets<ProductIndex>("Name:Harry");            
 
-            var resuls = searcher.Search(query, 100);            
+            results.Should().Not.Be.Null();
+            results.Facets.Should().Not.Be.Null();
+            results.Facets.Count.Should().Be.EqualTo(2);
 
-            var facets = IndexManager._facets.First().Value.Select(x =>
-            {
-                var bits = new OpenBitSetDISI(searchQueryFilter.GetDocIdSet(indexReader).Iterator(), indexReader.MaxDoc());
-                bits.And(x.MatchingDocuments);
-                var count = bits.Cardinality();
+            results.Facets[0].Value.Should().Be.EqualTo("book");
+            results.Facets[0].Count.Should().Be.EqualTo(2);
 
-                return new { Value = x.Value, Count = count };
-            }).ToList();
+            results.Facets[1].Value.Should().Be.EqualTo("dvd");
+            results.Facets[1].Count.Should().Be.EqualTo(3);
+        }
 
-            facets.Should().Not.Be.Null();
-            facets.Count.Should().Be.EqualTo(2);
-            
-            facets[0].Value.Should().Be.EqualTo("Book");
-            facets[0].Count.Should().Be.EqualTo(2);
+        [Test]
+        public void can_search_and_get_facets2()
+        {
+            var results = _manager.SearchWithFacets<ProductIndex>("ProductType:dvd");
 
-            facets[1].Value.Should().Be.EqualTo("DVD");
-            facets[1].Count.Should().Be.EqualTo(3);
+            results.Should().Not.Be.Null();
+            results.Facets.Should().Not.Be.Null();
+            results.Facets.Count.Should().Be.EqualTo(2);
+
+            results.Facets[0].Value.Should().Be.EqualTo("book");
+            results.Facets[0].Count.Should().Be.EqualTo(0);
+
+            results.Facets[1].Value.Should().Be.EqualTo("dvd");
+            results.Facets[1].Count.Should().Be.EqualTo(3);
         }
 
         //TODO: Keep this here?
@@ -69,24 +70,24 @@ namespace LuceneIndexManager.Tests
             public override IEnumerable<Document> GetAllDocuments()
             {
                 yield return new Document()
-                    .AddStringField("Name", "harry potter 1")
-                    .AddStringField("ProductType", "DVD");
+                    .AddField("Name", "harry potter 1", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
 
                 yield return new Document()
-                    .AddStringField("Name", "harry potter 2")
-                    .AddStringField("ProductType", "DVD");
+                    .AddField("Name", "harry potter 2", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
 
                 yield return new Document()
-                    .AddStringField("Name", "harry potter 3")
-                    .AddStringField("ProductType", "DVD");
+                    .AddField("Name", "harry potter 3", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
 
                 yield return new Document()
-                    .AddStringField("Name", "harry potter 1")
-                    .AddStringField("ProductType", "Book");
+                    .AddField("Name", "harry potter 1", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "Book", Field.Store.YES, Field.Index.ANALYZED);
 
                 yield return new Document()
-                    .AddStringField("Name", "harry potter 1")
-                    .AddStringField("ProductType", "Book");
+                    .AddField("Name", "harry potter 1", Field.Store.YES, Field.Index.ANALYZED)
+                    .AddField("ProductType", "Book", Field.Store.YES, Field.Index.ANALYZED);
             }
 
             public override List<FacetDefinition> GetFacetsDefinition()
