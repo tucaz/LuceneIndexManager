@@ -10,6 +10,7 @@ using Lucene.Net.Search;
 using Lucene.Net.Util;
 using LuceneIndexManager.Facets;
 using SharpTestsEx;
+using System.IO;
 
 namespace LuceneIndexManager.Tests
 {
@@ -22,10 +23,16 @@ namespace LuceneIndexManager.Tests
         [SetUp]
         public void create_index()
         {
+            var files = Directory.GetFiles(@"C:\temp\", "*.facet");
+            foreach (var file in files)
+            {
+                File.Delete(file);
+            }
+            
             _index = new ProductIndex();
             _manager = new IndexManager();
             _manager.RegisterIndex(_index);
-            _manager.CreateIndexes();
+            _manager.CreateIndexes();            
         }       
         
         [Test]
@@ -92,7 +99,7 @@ namespace LuceneIndexManager.Tests
 
             public override List<FacetDefinition> GetFacetsDefinition()
             {
-                return new List<FacetDefinition>() { new FacetDefinition("ProductType", "Product Type", "ProductType") };
+                return new List<FacetDefinition>() { new FacetDefinition("ProductType", "Product Type", "ProductType", @"C:\temp\") };
             }
         }
     }

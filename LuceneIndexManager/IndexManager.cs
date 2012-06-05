@@ -9,13 +9,13 @@ namespace LuceneIndexManager
 {
     public class IndexManager
     {
-        private Dictionary<int, List<Facet>> _facets = new Dictionary<int,List<Facet>>();
-        
+        private Dictionary<int, List<Facet>> _facets = new Dictionary<int, List<Facet>>();
+
         public IndexManager()
         {
             this.RegisteredIndexSources = new Dictionary<int, IIndexDefinition>();
         }
-        
+
         public Dictionary<int, IIndexDefinition> RegisteredIndexSources { get; private set; }
 
         public void RegisterIndex<T>() where T : IIndexDefinition
@@ -23,19 +23,19 @@ namespace LuceneIndexManager
             var source = Activator.CreateInstance<T>();
             this.RegisterIndex(source);
         }
-        
+
         public void RegisterIndex(IIndexDefinition source)
         {
             if (this.RegisteredIndexSources.ContainsKey(source.GetType().GetHashCode()))
                 throw new ArgumentException("Only one index of the same type can be registered. There is no reason why you would want to register the same index twice. :)");
-            
-            this.RegisteredIndexSources.Add(source.GetType().GetHashCode(),  source);
+
+            this.RegisteredIndexSources.Add(source.GetType().GetHashCode(), source);
         }
 
         public int CreateIndexes()
         {
             var indexesCreated = 0;
-            
+
             foreach (var index in this.RegisteredIndexSources)
             {
                 CreateIndex(index.Value);
@@ -56,24 +56,24 @@ namespace LuceneIndexManager
                 {
                     indexWriter.AddDocument(document);
                 }
-                
+
                 indexWriter.Commit();
                 indexWriter.Optimize();
                 indexWriter.Close();
 
-                CreateFacets(index);                
+                CreateFacets(index);
             }
         }
 
         private void CreateFacets(IIndexDefinition index)
-        {            
+        {
             var facetsToCreate = index.GetFacetsDefinition();
 
             var builder = new FacetBuilder(index);
             var facets = builder.CreateFacets(facetsToCreate);
 
             _facets.Add(index.GetHashCode(), facets);
-        }        
+        }
 
         #region Searching Operations
 
@@ -96,14 +96,18 @@ namespace LuceneIndexManager
 
             var hits = searcher.Search(parsedQuery);
 
-            var facets = this._facets.First().Value.Select(x =>
-            {
-                var bits = new OpenBitSetDISI(searchQueryFilter.GetDocIdSet(indexReader).Iterator(), indexReader.MaxDoc());
-                bits.And(x.MatchingDocuments);
-                var count = bits.Cardinality();
+            var facetsForThisIndex = this._facets[index.GetHashCode()];
 
-                return new FacetMatch() { Count = count, Value = x.Value };
-            }).ToList();
+            var facets = facetsForThisIndex.SelectMany(facet =>
+                facet.Values.Select(value =>
+                {
+                    var bits = new OpenBitSetDISI(searchQueryFilter.GetDocIdSet(indexReader).Iterator(), indexReader.MaxDoc());
+                    bits.And(value.Item2);
+                    var count = bits.Cardinality();
+
+                    return new FacetMatch() { Count = count, Value = value.Item1 };
+                })
+            ).ToList();
 
             return new FacetSearchResult()
             {
