@@ -162,17 +162,14 @@ namespace LuceneIndexManager
         {
             var index = this.FindRegisteredIndex(typeof(T));
             var searcher = this.GetSearcher<T>();
-            var indexReader = searcher.GetIndexReader();
-                        
+            var indexReader = searcher.GetIndexReader();                        
             var searchQueryFilter = new QueryWrapperFilter(query);
+            var facetMatcher = new FacetMatcher(searchQueryFilter, indexReader);
+            
             var hits = searcher.Search(query, topResults);
-
-            var facetsForThisIndex = this._facets[index.GetHashCode()];
-
-            var facets = facetsForThisIndex
-                .SelectMany(facet => facet.FindMatchesInQuery(searchQueryFilter, indexReader))
-                .ToList();
-
+            var facetsToMatch = this._facets[index.GetHashCode()];
+            var facets = facetMatcher.GetAllMatches(facetsToMatch);
+            
             return new FacetSearchResult()
             {
                 Facets = facets,
