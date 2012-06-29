@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 using LuceneIndexManager.Facets;
+using LuceneIndexManager.Util;
+using ThrowHelper;
 
 namespace LuceneIndexManager
 {
     public class IndexManager
     {
         private Dictionary<int, List<Facet>> _facets = new Dictionary<int, List<Facet>>();
+        private readonly string _facetsLocation = @"C:\temp\facets\";
 
         public IndexManager()
         {
@@ -70,9 +74,68 @@ namespace LuceneIndexManager
             var facetsToCreate = index.GetFacetsDefinition();
 
             var builder = new FacetBuilder(index.GetIndexSearcher().GetIndexReader());
+
+            //TODO: Add checking to make sure duplicated facets are not created and stored
             var facets = builder.CreateFacets(facetsToCreate);
+            
+            this.StoreFacets(facets, this._facetsLocation);
 
             _facets.Add(index.GetHashCode(), facets);
+        }
+
+        public void StoreFacets(List<Facet> facets, string path)
+        {
+            Throw.IfArgumentNull(facets);
+            Throw.IfArgumentNullOrEmpty(path);
+
+            "Storing Facets".Info();
+
+            foreach (var facet in facets)
+            {
+                StoreFacet(facet, path);
+            }
+
+            "Facets Stored".Info();
+        }
+
+        private void StoreFacet(Facet facet, string path)
+        {            
+            var pathToStoreFacet = Path.Combine(path, facet.UniqueName + ".facet");
+            
+            "Storing facet {0} in {1}".Debug(facet, path);
+
+            if (!Directory.Exists(path))
+            {
+                "The path {0} to store facets does not exists. Creating it...".Info(path);
+                Directory.CreateDirectory(path);
+                "Path successfully created".Info();
+            }
+
+            if (File.Exists(pathToStoreFacet))
+            {
+                "Facet already exists in disk. {0}. Path: {1}".Error(facet.ToString(), pathToStoreFacet);
+                throw new InvalidOperationException("Facet already exists in disk");
+            }
+            else
+            {
+                using (var fs = File.CreateText(pathToStoreFacet))
+                {
+                    fs.Write(facet.UniqueName);
+                    fs.Write("|");
+                    fs.Write(facet.Field);
+                    fs.Write("|");
+                    fs.Write(facet.DisplayName);
+                    fs.Write(Environment.NewLine);
+
+                    foreach (var value in facet.Values)
+                    {
+                        fs.Write(value.Item1);
+                        fs.Write("|");
+                        fs.Write(value.Item2.SerializeToBase64String());
+                        fs.Write(Environment.NewLine);
+                    }
+                }
+            }
         }
 
         #region Searching Operations

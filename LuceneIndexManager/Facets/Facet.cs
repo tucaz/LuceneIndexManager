@@ -51,5 +51,10 @@ namespace LuceneIndexManager.Facets
         {            
             return this.UniqueName.GetHashCode();
         }
+        
+        public override string ToString()
+        {
+            return this.UniqueName;
+        }
     }
 }

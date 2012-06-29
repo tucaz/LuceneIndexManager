@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Lucene.Net.Documents;
-using NUnit.Framework;
-using LuceneIndexManager.Util;
-using Lucene.Net.Search;
-using Lucene.Net.Util;
-using LuceneIndexManager.Facets;
-using SharpTestsEx;
+﻿using System.Collections.Generic;
 using System.IO;
+using Lucene.Net.Documents;
+using LuceneIndexManager.Facets;
+using LuceneIndexManager.Util;
+using NUnit.Framework;
+using SharpTestsEx;
 
 namespace LuceneIndexManager.Tests
 {
@@ -23,10 +17,17 @@ namespace LuceneIndexManager.Tests
         [SetUp]
         public void create_index()
         {
-            var files = Directory.GetFiles(@"C:\temp\", "*.facet");
-            foreach (var file in files)
+            //Clean any existing facets before running the tests to make sure 
+            //we are using new and correct data
+            var facetsDirectory = @"C:\temp\facets";
+
+            if (Directory.Exists(facetsDirectory))
             {
-                File.Delete(file);
+                var files = Directory.GetFiles(facetsDirectory, "*.facet");
+                foreach (var file in files)
+                {
+                    File.Delete(file);
+                }
             }
             
             _index = new ProductIndex();
@@ -99,7 +100,7 @@ namespace LuceneIndexManager.Tests
 
             public override List<FacetDefinition> GetFacetsDefinition()
             {
-                return new List<FacetDefinition>() { new FacetDefinition("ProductType", "Product Type", "ProductType", @"C:\temp\") };
+                return new List<FacetDefinition>() { new FacetDefinition("ProductType", "Product Type", "ProductType") };
             }
         }
     }
