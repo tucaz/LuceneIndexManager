@@ -13,6 +13,7 @@ namespace LuceneIndexManager.Facets
         public string UniqueName { get; private set; }
         public string DisplayName { get; private set; }
         public string Field { get; private set; }
+        public int Id { get { return this.GetHashCode(); } }
 
         public HashSet<Tuple<string, OpenBitSetDISI>> Values { get; private set; }
 

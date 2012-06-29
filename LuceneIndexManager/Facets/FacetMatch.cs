@@ -8,6 +8,7 @@ namespace LuceneIndexManager.Facets
 {
     public class FacetMatch
     {
+        public int Id { get; set; }
         public string Value { get; set; }
         public long Count { get; set; }
     }

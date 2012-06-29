@@ -158,6 +158,16 @@ namespace LuceneIndexManager
             return index.GetDefaultQueryParser();
         }
 
+        public FacetSearchResult SearchWithFacets<T>(Query query, int topResults, List<FacetMatch> filterByFacet) where T : IIndexDefinition
+        {
+            var index = this.FindRegisteredIndex(typeof(T));
+            var facetsToMatch = this._facets[index.GetHashCode()];
+
+            var facetsToFilter = filterByFacet.Select(x => facetsToMatch.First(y => y.Id == x.Id));
+            
+            throw new NotImplementedException();            
+        }
+        
         public FacetSearchResult SearchWithFacets<T>(Query query, int topResults) where T : IIndexDefinition
         {
             var index = this.FindRegisteredIndex(typeof(T));
