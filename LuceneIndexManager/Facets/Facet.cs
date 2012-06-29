@@ -47,6 +47,20 @@ namespace LuceneIndexManager.Facets
              .ForEach(x => this.AddValue(x.Value, x.MatchingDocuments));
         }
 
+        internal List<FacetMatch> FindMatchesInQuery(QueryWrapperFilter searchQueryFilter, IndexReader indexReader)
+        {
+            var matches = this.Values.Select(value =>
+            {
+                var bits = new OpenBitSetDISI(searchQueryFilter.GetDocIdSet(indexReader).Iterator(), indexReader.MaxDoc());
+                bits.And(value.Item2);
+                var count = bits.Cardinality();
+
+                return new FacetMatch() { Count = count, Value = value.Item1 };
+            }).ToList();
+
+            return matches;
+        }
+
         public override int GetHashCode()
         {            
             return this.UniqueName.GetHashCode();
@@ -55,6 +69,6 @@ namespace LuceneIndexManager.Facets
         public override string ToString()
         {
             return this.UniqueName;
-        }
+        }       
     }
 }

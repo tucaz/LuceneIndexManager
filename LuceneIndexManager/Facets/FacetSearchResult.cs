@@ -6,6 +6,6 @@ namespace LuceneIndexManager.Facets
     public class FacetSearchResult
     {
         public List<FacetMatch> Facets { get; set; }
-        public Hits Hits { get; set; }
+        public TopDocs Hits { get; set; }
     }
 }

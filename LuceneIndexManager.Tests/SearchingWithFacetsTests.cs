@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Lucene.Net.Search;
 using LuceneIndexManager.Tests.TestIndexes;
 using NUnit.Framework;
 using SharpTestsEx;
@@ -36,7 +37,10 @@ namespace LuceneIndexManager.Tests
         [Test]
         public void can_search_and_get_facets()
         {
-            var results = _manager.SearchWithFacets<DiskProductIndex>("Name:Harry");            
+            var queryParser = _manager.GetQueryParser<DiskProductIndex>();
+            var query = queryParser.Parse("Name:Harry");
+            
+            var results = _manager.SearchWithFacets<DiskProductIndex>(query, 100);
 
             results.Should().Not.Be.Null();
             results.Facets.Should().Not.Be.Null();
@@ -52,7 +56,10 @@ namespace LuceneIndexManager.Tests
         [Test]
         public void can_search_and_get_facets2()
         {
-            var results = _manager.SearchWithFacets<DiskProductIndex>("ProductType:dvd");
+            var queryParser = _manager.GetQueryParser<DiskProductIndex>();
+            var query = queryParser.Parse("ProductType:dvd");
+            
+            var results = _manager.SearchWithFacets<DiskProductIndex>(query, 100);
 
             results.Should().Not.Be.Null();
             results.Facets.Should().Not.Be.Null();

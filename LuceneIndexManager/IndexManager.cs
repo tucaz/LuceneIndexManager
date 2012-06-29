@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Lucene.Net.QueryParsers;
 using Lucene.Net.Search;
 using Lucene.Net.Util;
 using LuceneIndexManager.Facets;
@@ -43,6 +44,10 @@ namespace LuceneIndexManager
         /// <returns>Number of indexes created</returns>
         public int CreateIndexes()
         {
+            "{0} index(es) registered".Debug(this.RegisteredIndexSources.Count);
+            
+            "Creating index(es)".Info();
+            
             var indexesCreated = 0;
 
             foreach (var index in this.RegisteredIndexSources)
@@ -50,6 +55,8 @@ namespace LuceneIndexManager
                 CreateIndex(index.Value);
                 indexesCreated++;
             }
+
+            "{0} index(e)s created".Info(indexesCreated);
 
             return indexesCreated;
         }
@@ -93,14 +100,14 @@ namespace LuceneIndexManager
             Throw.IfArgumentNull(facets);
             Throw.IfArgumentNullOrEmpty(path);
 
-            "Storing Facets".Info();
+            "Storing facet(s)".Info();
 
             foreach (var facet in facets)
             {
                 StoreFacet(facet, path);
             }
 
-            "Facets Stored".Info();
+            "Facet(s) stored".Info();
         }
 
         private void StoreFacet(Facet facet, string path)
@@ -143,45 +150,41 @@ namespace LuceneIndexManager
             }
         }
 
-        #region Searching Operations
+        #region Searching Operations        
 
-        public IndexSearcher GetSearcher<T>() where T : IIndexDefinition
+        public QueryParser GetQueryParser<T>() where T : IIndexDefinition
         {
             var index = this.FindRegisteredIndex(typeof(T));
-            var searcher = index.GetIndexSearcher();
-            return searcher;
+            return index.GetDefaultQueryParser();
         }
 
-        public FacetSearchResult SearchWithFacets<T>(string query) where T : IIndexDefinition
+        public FacetSearchResult SearchWithFacets<T>(Query query, int topResults) where T : IIndexDefinition
         {
             var index = this.FindRegisteredIndex(typeof(T));
             var searcher = this.GetSearcher<T>();
             var indexReader = searcher.GetIndexReader();
-            var queryParser = index.GetDefaultQueryParser();
-            var parsedQuery = queryParser.Parse(query);
-
-            var searchQueryFilter = new QueryWrapperFilter(parsedQuery);
-
-            var hits = searcher.Search(parsedQuery);
+                        
+            var searchQueryFilter = new QueryWrapperFilter(query);
+            var hits = searcher.Search(query, topResults);
 
             var facetsForThisIndex = this._facets[index.GetHashCode()];
 
-            var facets = facetsForThisIndex.SelectMany(facet =>
-                facet.Values.Select(value =>
-                {
-                    var bits = new OpenBitSetDISI(searchQueryFilter.GetDocIdSet(indexReader).Iterator(), indexReader.MaxDoc());
-                    bits.And(value.Item2);
-                    var count = bits.Cardinality();
-
-                    return new FacetMatch() { Count = count, Value = value.Item1 };
-                })
-            ).ToList();
+            var facets = facetsForThisIndex
+                .SelectMany(facet => facet.FindMatchesInQuery(searchQueryFilter, indexReader))
+                .ToList();
 
             return new FacetSearchResult()
             {
                 Facets = facets,
                 Hits = hits
             };
+        }
+
+        private IndexSearcher GetSearcher<T>() where T : IIndexDefinition
+        {
+            var index = this.FindRegisteredIndex(typeof(T));
+            var searcher = index.GetIndexSearcher();
+            return searcher;
         }
 
         //TODO: This is internal just to be available for testing. Need to turn it to private and find another way to test it
