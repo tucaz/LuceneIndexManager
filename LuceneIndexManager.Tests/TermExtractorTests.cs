@@ -14,7 +14,7 @@ namespace LuceneIndexManager.Tests
         [SetUp]
         public void create_index()
         {
-            _index = new ProductIndex();
+            _index = new InMemoryProductIndex();
 
             var manager = new IndexManager();
             manager.RegisterIndex(_index);

@@ -1,8 +1,5 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using Lucene.Net.Documents;
-using LuceneIndexManager.Facets;
-using LuceneIndexManager.Util;
+﻿using System.IO;
+using LuceneIndexManager.Tests.TestIndexes;
 using NUnit.Framework;
 using SharpTestsEx;
 
@@ -30,7 +27,7 @@ namespace LuceneIndexManager.Tests
                 }
             }
             
-            _index = new ProductIndex();
+            _index = new DiskProductIndex();
             _manager = new IndexManager();
             _manager.RegisterIndex(_index);
             _manager.CreateIndexes();            
@@ -39,7 +36,7 @@ namespace LuceneIndexManager.Tests
         [Test]
         public void can_search_and_get_facets()
         {
-            var results = _manager.SearchWithFacets<ProductIndex>("Name:Harry");            
+            var results = _manager.SearchWithFacets<DiskProductIndex>("Name:Harry");            
 
             results.Should().Not.Be.Null();
             results.Facets.Should().Not.Be.Null();
@@ -55,7 +52,7 @@ namespace LuceneIndexManager.Tests
         [Test]
         public void can_search_and_get_facets2()
         {
-            var results = _manager.SearchWithFacets<ProductIndex>("ProductType:dvd");
+            var results = _manager.SearchWithFacets<DiskProductIndex>("ProductType:dvd");
 
             results.Should().Not.Be.Null();
             results.Facets.Should().Not.Be.Null();
@@ -66,42 +63,6 @@ namespace LuceneIndexManager.Tests
 
             results.Facets[1].Value.Should().Be.EqualTo("dvd");
             results.Facets[1].Count.Should().Be.EqualTo(3);
-        }
-
-        //TODO: Keep this here?
-        private class ProductIndex : FSIndexDefinition
-        {
-            public ProductIndex() : base(@"C:\temp\Harry")
-            {
-            }
-            
-            public override IEnumerable<Document> GetAllDocuments()
-            {
-                yield return new Document()
-                    .AddField("Name", "harry potter 1", Field.Store.YES, Field.Index.ANALYZED)
-                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
-
-                yield return new Document()
-                    .AddField("Name", "harry potter 2", Field.Store.YES, Field.Index.ANALYZED)
-                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
-
-                yield return new Document()
-                    .AddField("Name", "harry potter 3", Field.Store.YES, Field.Index.ANALYZED)
-                    .AddField("ProductType", "DVD", Field.Store.YES, Field.Index.ANALYZED);
-
-                yield return new Document()
-                    .AddField("Name", "harry potter 1", Field.Store.YES, Field.Index.ANALYZED)
-                    .AddField("ProductType", "Book", Field.Store.YES, Field.Index.ANALYZED);
-
-                yield return new Document()
-                    .AddField("Name", "harry potter 1", Field.Store.YES, Field.Index.ANALYZED)
-                    .AddField("ProductType", "Book", Field.Store.YES, Field.Index.ANALYZED);
-            }
-
-            public override List<FacetDefinition> GetFacetsDefinition()
-            {
-                return new List<FacetDefinition>() { new FacetDefinition("ProductType", "Product Type", "ProductType") };
-            }
         }
     }
 }

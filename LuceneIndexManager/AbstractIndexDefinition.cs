@@ -11,6 +11,11 @@ using LuceneIndexManager.Facets;
 
 namespace LuceneIndexManager
 {
+    /// <summary>
+    /// Basic implementation of an Index definition. 
+    /// Uses RAMDirectory to store the Lucene index.
+    /// Well suited for running tests
+    /// </summary>
     public abstract class AbstractIndexDefinition : IIndexDefinition
     {
         private IndexWriter _indexWriter;

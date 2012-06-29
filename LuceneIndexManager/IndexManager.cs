@@ -13,6 +13,7 @@ namespace LuceneIndexManager
     public class IndexManager
     {
         private Dictionary<int, List<Facet>> _facets = new Dictionary<int, List<Facet>>();
+        //TODO: Make it configurable
         private readonly string _facetsLocation = @"C:\temp\facets\";
 
         public IndexManager()
@@ -36,6 +37,10 @@ namespace LuceneIndexManager
             this.RegisteredIndexSources.Add(source.GetType().GetHashCode(), source);
         }
 
+        /// <summary>
+        /// Creates all registered indexes
+        /// </summary>
+        /// <returns>Number of indexes created</returns>
         public int CreateIndexes()
         {
             var indexesCreated = 0;

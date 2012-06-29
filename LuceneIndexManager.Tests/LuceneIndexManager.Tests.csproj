@@ -59,7 +59,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchingWithFacetsTests.cs" />
     <Compile Include="TermExtractorTests.cs" />
-    <Compile Include="TestIndexes\ProductIndex.cs" />
+    <Compile Include="TestIndexes\DiskProductIndex.cs" />
+    <Compile Include="TestIndexes\InMemoryProductIndex.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
