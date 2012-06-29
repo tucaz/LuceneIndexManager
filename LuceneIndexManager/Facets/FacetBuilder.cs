@@ -15,11 +15,11 @@ namespace LuceneIndexManager.Facets
 {
     internal class FacetBuilder
     {
-        private IIndexDefinition Index { get; set; }
+        private IndexReader IndexReader { get; set; }
 
-        public FacetBuilder(IIndexDefinition index)
+        public FacetBuilder(IndexReader indexReader)
         {
-            this.Index = index;
+            this.IndexReader = indexReader;
         }
 
         public List<Facet> CreateFacets(List<FacetDefinition> facetsToCreate)
@@ -95,47 +95,13 @@ namespace LuceneIndexManager.Facets
         }
 
         private Facet CreateFacet(FacetDefinition definition)
-        {
+        {            
             //TODO: Should this class have access to the index or should it receive all terms from somewhere else?
-            var indexReader = this.Index.GetIndexSearcher().GetIndexReader();
-            var allTerms = this.GetAllTermsForField(definition.Field, indexReader);
-
+            var indexReader = this.IndexReader;
             var facet = new Facet(definition.UniqueName, definition.DisplayName, definition.Field);
-
-            allTerms
-                .Select(x =>
-                {
-                    var facetQuery = new TermQuery(new Term(definition.Field, x));
-                    var facetQueryFilter = new CachingWrapperFilter(new QueryWrapperFilter(facetQuery));
-                    var bitSet = new OpenBitSetDISI(facetQueryFilter.GetDocIdSet(indexReader).Iterator(), indexReader.MaxDoc());
-
-                    return new { 
-                        Value = x, 
-                        MatchingDocuments = bitSet 
-                    };
-                })
-                .ToList()
-                .ForEach(x => facet.AddValue(x.Value, x.MatchingDocuments));
-
+            facet.Build(indexReader);
+         
             return facet;
-        }
-
-        //TODO: This is internal just to be available for testing. Need to turn it to private and find another way to test it
-        internal List<string> GetAllTermsForField(string field, IndexReader reader)
-        {
-            var allterms = new List<string>();
-            var termReader = reader.Terms(new Term(field, String.Empty));
-
-            do
-            {
-                if (termReader.Term().Field() != field)
-                    break;
-
-                allterms.Add(termReader.Term().Text());
-            }
-            while (termReader.Next());
-
-            return allterms;
         }
     }
 }

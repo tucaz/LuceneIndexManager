@@ -69,7 +69,7 @@ namespace LuceneIndexManager
         {
             var facetsToCreate = index.GetFacetsDefinition();
 
-            var builder = new FacetBuilder(index);
+            var builder = new FacetBuilder(index.GetIndexSearcher().GetIndexReader());
             var facets = builder.CreateFacets(facetsToCreate);
 
             _facets.Add(index.GetHashCode(), facets);

@@ -58,12 +58,11 @@
     <Compile Include="IndexManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SearchingWithFacetsTests.cs" />
+    <Compile Include="TermExtractorTests.cs" />
+    <Compile Include="TestIndexes\ProductIndex.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LuceneIndexManager\LuceneIndexManager.csproj">
