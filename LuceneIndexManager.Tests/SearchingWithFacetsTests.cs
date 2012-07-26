@@ -89,11 +89,36 @@ namespace LuceneIndexManager.Tests
 
             results.Should().Not.Be.Null();
             results.Facets.Should().Not.Be.Null();
-            results.Facets.Count.Should().Be.EqualTo(1);
+            results.Facets.Count.Should().Be.EqualTo(2);
             results.Facets[0].Value.Should().Be.EqualTo("book");
             results.Facets[0].Count.Should().Be.EqualTo(2);
+            results.Facets[1].Value.Should().Be.EqualTo("dvd");
+            results.Facets[1].Count.Should().Be.EqualTo(0);
 
             results.Hits.TotalHits.Should().Be.EqualTo(2);
+        }
+
+        [Test]
+        public void can_search_with_a_facet_as_filter2()
+        {
+            var queryParser = _manager.GetQueryParser<DiskProductIndex>();
+            var query = queryParser.Parse("Name:\"Harry Potter 1\"");
+
+            var results = _manager.SearchWithFacets<DiskProductIndex>(query, 100);
+
+            var onlyBooksFacet = results.Facets.Where(x => x.Value == "book").First();
+
+            results = _manager.SearchWithFacets<DiskProductIndex>(query, 100, new List<FacetMatch> { onlyBooksFacet });
+
+            results.Should().Not.Be.Null();
+            results.Facets.Should().Not.Be.Null();
+            results.Facets.Count.Should().Be.EqualTo(2);
+            results.Facets[0].Value.Should().Be.EqualTo("book");
+            results.Facets[0].Count.Should().Be.EqualTo(1);
+            results.Facets[1].Value.Should().Be.EqualTo("dvd");
+            results.Facets[1].Count.Should().Be.EqualTo(0);
+
+            results.Hits.TotalHits.Should().Be.EqualTo(1);
         }
     }
 }

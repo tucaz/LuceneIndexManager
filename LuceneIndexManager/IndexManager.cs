@@ -45,9 +45,9 @@ namespace LuceneIndexManager
         public int CreateIndexes()
         {
             "{0} index(es) registered".Debug(this.RegisteredIndexSources.Count);
-            
+
             "Creating index(es)".Info();
-            
+
             var indexesCreated = 0;
 
             foreach (var index in this.RegisteredIndexSources)
@@ -89,7 +89,7 @@ namespace LuceneIndexManager
 
             //TODO: Add checking to make sure duplicated facets are not created and stored
             var facets = builder.CreateFacets(facetsToCreate);
-            
+
             this.StoreFacets(facets, this._facetsLocation);
 
             _facets.Add(index.GetHashCode(), facets);
@@ -111,9 +111,9 @@ namespace LuceneIndexManager
         }
 
         private void StoreFacet(Facet facet, string path)
-        {            
+        {
             var pathToStoreFacet = Path.Combine(path, facet.UniqueName + ".facet");
-            
+
             "Storing facet {0} in {1}".Debug(facet, path);
 
             if (!Directory.Exists(path))
@@ -150,7 +150,7 @@ namespace LuceneIndexManager
             }
         }
 
-        #region Searching Operations        
+        #region Searching Operations
 
         public QueryParser GetQueryParser<T>() where T : IIndexDefinition
         {
@@ -161,25 +161,37 @@ namespace LuceneIndexManager
         public FacetSearchResult SearchWithFacets<T>(Query query, int topResults, List<FacetMatch> filterByFacet) where T : IIndexDefinition
         {
             var index = this.FindRegisteredIndex(typeof(T));
-            var facetsToMatch = this._facets[index.GetHashCode()];
-
-            var facetsToFilter = filterByFacet.Select(x => facetsToMatch.First(y => y.Id == x.Id));
+            var facetsToMatch = this._facets[index.GetHashCode()];            
+            var searcher = this.GetSearcher<T>();
+            var indexReader = searcher.GetIndexReader();
+            var searchQueryFilter = new QueryWrapperFilter(query);            
+            var facetAsFiter = facetsToMatch.First(x => x.Id == filterByFacet.First().Id).Values.First(x => x.Item1 == filterByFacet.First().Value);
+            var facetMatcher = new FacetMatcher(searchQueryFilter, facetAsFiter.Item3, indexReader);
             
-            throw new NotImplementedException();            
+            var hits = searcher.Search(query, facetAsFiter.Item3, topResults);            
+
+            var facets = facetMatcher.GetAllMatches(facetsToMatch);
+
+            return new FacetSearchResult()
+            {
+                Facets = facets,
+                Hits = hits
+            };
         }
-        
+
         public FacetSearchResult SearchWithFacets<T>(Query query, int topResults) where T : IIndexDefinition
         {
             var index = this.FindRegisteredIndex(typeof(T));
             var searcher = this.GetSearcher<T>();
-            var indexReader = searcher.GetIndexReader();                        
-            var searchQueryFilter = new QueryWrapperFilter(query);
+            var indexReader = searcher.GetIndexReader();
+            var searchQueryFilter = new QueryWrapperFilter(query);            
+
             var facetMatcher = new FacetMatcher(searchQueryFilter, indexReader);
-            
+
             var hits = searcher.Search(query, topResults);
             var facetsToMatch = this._facets[index.GetHashCode()];
             var facets = facetMatcher.GetAllMatches(facetsToMatch);
-            
+
             return new FacetSearchResult()
             {
                 Facets = facets,

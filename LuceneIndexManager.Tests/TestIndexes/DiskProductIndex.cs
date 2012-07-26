@@ -31,7 +31,7 @@ namespace LuceneIndexManager.Tests.TestIndexes
                 .AddField("ProductType", "Book", Field.Store.YES, Field.Index.ANALYZED);
 
             yield return new Document()
-                .AddField("Name", "harry potter 1", Field.Store.YES, Field.Index.ANALYZED)
+                .AddField("Name", "harry potter 2", Field.Store.YES, Field.Index.ANALYZED)
                 .AddField("ProductType", "Book", Field.Store.YES, Field.Index.ANALYZED);
         }
 

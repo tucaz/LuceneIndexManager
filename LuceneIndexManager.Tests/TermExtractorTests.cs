@@ -3,6 +3,7 @@ using LuceneIndexManager.Tests.TestIndexes;
 using LuceneIndexManager.Util;
 using NUnit.Framework;
 using SharpTestsEx;
+using System.Linq;
 
 namespace LuceneIndexManager.Tests
 {
@@ -34,7 +35,7 @@ namespace LuceneIndexManager.Tests
 
             values.Should().Not.Be.Null();
             values.Count.Should().Be.EqualTo(2);
-            values.Should().Have.SameValuesAs("dvd", "book");
+            values.Select(x => x.Item1).Should().Have.SameValuesAs("dvd", "book");
         }
     }
 }
